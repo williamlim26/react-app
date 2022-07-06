@@ -40,7 +40,7 @@ jobs:
         with: 
           name: build
           path: build
-      - name: Deploy to Staging
+      - name: Deploy to Stagings
         if: github.event_name == 'push'
         run: npx surge --project ./build --domain kingswitch.surge.sh
         env: 
