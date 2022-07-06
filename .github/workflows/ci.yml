@@ -10,7 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
-      - name: Use NodeJss
+      - name: Cahce node_modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Use NodeJs
         uses: actions/setup-node@v1
         with:
           node-version: "12.x"
@@ -19,9 +26,20 @@ jobs:
       - run: npm test -- -coverage
         env: 
           CI: true
+      - name: Upload Test Coverage
+        uses: actions/upload-artifacts@v1
+        with: 
+          name: code-coverage
+          path: coverage
       - name: Build Project
         if: github.event_name == 'push'
         run: npm run build
+      - name: Upload Build Folder
+        if: github.event_name == 'push'
+        uses: actions/upload-artifacts@v1
+        with: 
+          name: build
+          path: build
       - name: Deploy to Staging
         if: github.event_name == 'push'
         run: npx surge --project ./build --domain kingswitch.surge.sh
